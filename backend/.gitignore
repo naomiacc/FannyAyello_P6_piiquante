@@ -1,2 +1,10 @@
 node_modules
+
 images/
+
+# fichiers de variables d'environnement dotenv
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local

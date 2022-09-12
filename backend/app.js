@@ -3,8 +3,18 @@
 // Le middleware Express reçoit également la méthode next , qui permet à chaque middleware de passer l'exécution au middleware suivant.
 
 const express = require("express");
-const app = express();
 const mongoose = require("mongoose");
+
+// sécurisation des entêtes HTTP
+const helmet = require("helmet");
+// prévient les attaques par injection de sélecteur de requête MongoDB
+const mongoSanitize = require("express-mongo-sanitize");
+
+// sécurisation des cléfs
+const dotenv = require("dotenv").config();
+console.log(dotenv);
+
+const app = express();
 
 // importation des routeurs
 const saucesRoutes = require("./routes/sauces");
@@ -14,7 +24,7 @@ const path = require("path");
 
 mongoose
   .connect(
-    "mongodb+srv://naomiacc:mongodb2104@cluster0.n2sa7kc.mongodb.net/?retryWrites=true&w=majority",
+    "mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.n2sa7kc.mongodb.net/?retryWrites=true&w=majority",
     { useNewUrlParser: true, useUnifiedTopology: true }
   )
   .then(() => console.log("Connexion à MongoDB réussie !"))
@@ -43,6 +53,18 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+// Autoriser l'origine croisée pour les images
+/* L' en-tête Cross-Origin-Resource-Policy ( CORP ) vous permet de contrôler l'ensemble des origines autorisées à inclure une ressource. 
+C'est une défense robuste contre les attaques comme Spectre , car il permet aux navigateurs de bloquer une réponse donnée avant 
+qu'elle n'entre dans le processus d'un attaquant. */
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+  })
+);
+
+app.use(mongoSanitize());
 
 //enregistrement des routes
 app.use("/api/sauces", saucesRoutes);
