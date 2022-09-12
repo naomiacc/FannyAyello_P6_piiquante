@@ -1,6 +1,8 @@
 const User = require("../models/user");
-const bcrypt = require("bcrypt"); // hash
 const jwt = require("jsonwebtoken");
+
+const bcrypt = require("bcrypt"); // hash
+const cryptojs = require("crypto-js"); // Encrypt mail
 
 const passwordValidator = require("password-validator");
 
