@@ -97,11 +97,12 @@ exports.login = (req, res, next) => {
 
           const userId = user._id.toString();
 
+          console.log(user._id);
           res.status(200).json({
-            userId: User._id,
+            userId: user._id,
             /* Données que l'on veut encoder -> payload. Le UserId est encodé car on ne veut pas qu'un user soit en capacité de modifier 
             les informations d'un autres UserId.*/
-            token: jwt.sign({ userId: User._id }, process.env.SECRET_TOKEN, {
+            token: jwt.sign({ userId: user._id }, process.env.SECRET_TOKEN, {
               expiresIn: "24h",
             }),
           });
