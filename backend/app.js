@@ -24,7 +24,7 @@ const path = require("path");
 
 mongoose
   .connect(
-    "mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.n2sa7kc.mongodb.net/?retryWrites=true&w=majority",
+    `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.n2sa7kc.mongodb.net/?retryWrites=true&w=majority`,
     { useNewUrlParser: true, useUnifiedTopology: true }
   )
   .then(() => console.log("Connexion à MongoDB réussie !"))
