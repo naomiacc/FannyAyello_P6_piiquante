@@ -46,40 +46,61 @@ exports.modifySauce = (req, res, next) => {
       }
     : { ...req.body };
 
-  if (req.body.userId && req.body.userId !== userId) {
-    throw "Invalid user ID";
-  } else {
-    Sauce.updateOne(
-      { _id: req.params.id },
-      { ...sauceObject, _id: req.params.id }
-    )
-      .then(() => res.status(200).json({ message: "Sauce modifiée !" }))
-      .catch((error) => res.status(400).json({ error }));
-  }
+  console.log("sauce", sauceObject);
+  console.log("paramID", req.params.id);
+
+  Sauce.findOne({ _id: req.params.id }) // l'id de la sauce est l'id inscrit dans l'url
+    // si la sauce existe
+    .then((sauce) => {
+      // l'id du créateur de la sauce doit etre le meme que celui identifié par le token
+      if (sauce.userId != req.auth.userId) {
+        res.status(401).json({ message: "Not authorized" });
+      } else {
+        // modifie une sauce dans la base de donnée, 1er argument = l'objet modifié avec id correspondant à l'id de la requete
+        // 2ème argument = nouvel objet qui contient la sauce du corp de la requete et que _id correspond à celui des paramètres
+        Sauce.updateOne(
+          { _id: req.params.id },
+          { ...sauceObject, _id: req.params.id }
+        )
+          .then(() => res.status(200).json({ message: "Sauce modifiée !" }))
+          .catch((error) => res.status(400).json({ error }));
+      }
+    })
+    .catch((error) => {
+      res.status(400).json({ error });
+    });
 };
 
 //Suppression d'une sauce
 exports.deleteSauce = (req, res, next) => {
-  Sauce.findOne({ _id: req.params.id }).then((sauce) => {
-    const filename = sauce.imageUrl.split("/images/"[1]);
-    fs.unlink(`images/${filename}`, () => {
-      if (req.body.userId && req.body.userId !== userId) {
-        throw "Invalid user ID";
+  Sauce.findOne({ _id: req.params.id }) // on cherche la sauce de la base de données
+    .then((sauce) => {
+      // l'id du créateur de la sauce doit etre le meme que celui identifié par le token
+      if (sauce.userId !== req.auth.userId) {
+        res.status(400).json({ message: "Not authorized" });
       } else {
-        Sauce.deleteOne({ _id: req.params.id })
-          .then(() => {
-            res.status(200).json({
-              message: "Deleted!",
+        // on créer un tableau via l'url en séparant la partie '/images' et on récupère l'indice 1 du tableau qui est le nom
+        const filename = sauce.imageUrl.split("/images/")[1];
+        // unlink supprime l'image de la sauce
+        fs.unlink(`images/${filename}`, () => {
+          // supprime une sauce dans la base de donnée, argument = l'objet modifié avec id correspondant à l'id de la requete
+          Sauce.deleteOne({ _id: req.params.id })
+            .then(() => {
+              res.status(200).json({
+                message: "Deleted!",
+              });
+            })
+            .catch((error) => {
+              res.status(400).json({
+                error: error,
+              });
             });
-          })
-          .catch((error) => {
-            res.status(400).json({
-              error: error,
-            });
-          });
+        });
       }
+    })
+    .catch((error) => {
+      res.status(500).json({ error });
     });
-  });
 };
 
 exports.likeSauce = (req, res, next) => {
