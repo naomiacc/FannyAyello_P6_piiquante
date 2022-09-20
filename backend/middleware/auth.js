@@ -17,6 +17,7 @@ module.exports = (req, res, next) => {
     /* On vient décoder le token. Lorsque le token est décodé, cela devient un objet JS */
     const decodedToken = jwt.verify(token, process.env.SECRET_TOKEN);
     const userId = decodedToken.userId;
+    req.auth = { userId: userId };
 
     if (req.body.userId && req.body.userId !== userId) {
       throw "Invalid user ID";

@@ -76,6 +76,9 @@ exports.deleteSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id }) // on cherche la sauce de la base de données
     .then((sauce) => {
       // l'id du créateur de la sauce doit etre le meme que celui identifié par le token
+      console.log("userId", sauce.userId);
+      console.log("auth.userId", req.auth.userId);
+
       if (sauce.userId !== req.auth.userId) {
         res.status(400).json({ message: "Not authorized" });
       } else {
